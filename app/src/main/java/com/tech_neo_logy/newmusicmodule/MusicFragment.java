@@ -1,12 +1,24 @@
 package com.tech_neo_logy.newmusicmodule;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.android.volley.Cache;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.tech_neo_logy.newmusicmodule.network.VolleySingleton;
+
+import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -28,6 +40,12 @@ public class MusicFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private int loader;
+    private View musicFragmentView;
+    private ImageView albumArt;
+    private String image_url;
+    private ImageLoader imageLoader;
+
 
     public MusicFragment() {
         // Required empty public constructor
@@ -58,13 +76,61 @@ public class MusicFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        //load image before fetching album art
+
+
+    }
+
+    private void loadImageToView(String url, final ImageView holder)
+    {
+
+//      Picasso.with(MyApplication.getAppcontext()).load("http://square.github.io/picasso/static/sample.png").into(albumArt);
+        imageLoader = VolleySingleton.getVolleyInstance().getImageLoader();
+//      albumArt.setImageUrl(image_url,imageLoader);
+        imageLoader.get(url, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                if (response.getBitmap() != null) {
+                    // load image into imageview
+                    holder.setImageBitmap(response.getBitmap());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        holder.setBackground(null);
+                    }
+                }
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(new String(), "Image Load Error: " + error.getMessage());
+            }
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_music, container, false);
+        image_url = "http://square.github.io/picasso/static/sample.png";
+        musicFragmentView = inflater.inflate(R.layout.fragment_music,container,false);
+        albumArt = (ImageView)musicFragmentView.findViewById(R.id.music_albumArt_netView);
+//        image_url = "http://api.androidhive.info/images/sample.jpg";
+        loadImageToView(image_url,albumArt);
+
+//        Cache cache = VolleySingleton.getVolleyInstance().getRequestQueue().getCache();
+//        Cache.Entry entry = cache.get(image_url);
+//        if(entry != null){
+//            try {
+//                String data = new String(entry.data, "UTF-8");
+//                // handle data, like converting it to xml, json, bitmap etc.,
+//            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+//            }
+//        }else{
+//            // cached response doesn't exists. Make a network call here
+//        }
+
+        return musicFragmentView;
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
