@@ -34,7 +34,6 @@
             android:layout_height="30dp"
             android:id="@+id/musicSeekBar"
             android:layout_weight="1"
-            android:background="#ccc"
 
             />
     </LinearLayout>
@@ -49,7 +48,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/playPauseButton"
-            android:background="@android:drawable/ic_media_play"
+            android:background="@mipmap/play"
+            />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/nextTrackButton"
+            android:background="@mipmap/next"
             />
     </LinearLayout>
 
