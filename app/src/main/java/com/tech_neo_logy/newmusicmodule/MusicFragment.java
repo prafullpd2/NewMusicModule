@@ -1,29 +1,42 @@
 package com.tech_neo_logy.newmusicmodule;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.Cache;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.tech_neo_logy.newmusicmodule.musicService.MusicPlayerService;
+import com.tech_neo_logy.newmusicmodule.musicService.PlaylistItemAdapter;
+import com.tech_neo_logy.newmusicmodule.musicService.PlaylistItems;
 import com.tech_neo_logy.newmusicmodule.network.VolleySingleton;
 
-import java.io.UnsupportedEncodingException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MusicFragment extends Fragment {
@@ -39,7 +52,12 @@ public class MusicFragment extends Fragment {
     Intent serviceIntent;
     private static boolean boolMusicPlaying = false;
     private String musicUrl;
-
+    private ProgressDialog progressDialog = null;
+    private List<PlaylistItems> playlistItemsArrayList = new ArrayList<PlaylistItems>();
+    private ListView playlistListView;
+    private PlaylistItemAdapter adapter;
+    private static final String jsonUrl = "http://api.androidhive.info/json/movies.json";
+    private DrawerLayout drawerLayout;
 
     public MusicFragment() {
         // Required empty public constructor
@@ -55,9 +73,7 @@ public class MusicFragment extends Fragment {
             e.printStackTrace();
             Toast.makeText(MyApplication.getAppcontext(), e.getClass().getName()+" "+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,14 +85,79 @@ public class MusicFragment extends Fragment {
         musicUrl = "https://s3-ap-northeast-1.amazonaws.com/audiopraf2/02+-+3G+-+Khalbali+%5BMP3Khan%5D.mp3";
         playPauseButton = (ImageButton) musicFragmentView.findViewById(R.id.playPauseButton);
         nextTrackButton = (ImageButton) musicFragmentView.findViewById(R.id.nextTrackButton);
+
         if(boolMusicPlaying)
             playPauseButton.setBackgroundResource(R.mipmap.pause);
         else
             playPauseButton.setBackgroundResource(R.mipmap.play);
         Toast.makeText(getContext(), "bool value "+boolMusicPlaying, Toast.LENGTH_SHORT).show();
         setlistener();
+
+        drawerLayout = (DrawerLayout)musicFragmentView.findViewById(R.id.drawer_in_music) ;
+        playlistListView = (ListView)drawerLayout.findViewById(R.id.listView_playlist);
+
+
+        progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage("loading...");
+        progressDialog.show();
+
+
+        adapter = new PlaylistItemAdapter(getActivity(),playlistItemsArrayList);
+
+
+
+
+        //create jsonvolley request
+
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(jsonUrl, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+
+                hideDialog();
+                //parsing Json
+                for(int i=0;i<response.length();i++){
+                    try {
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        PlaylistItems playlistItem = new PlaylistItems();
+                        playlistItem.setTitle(jsonObject.getString("title"));
+                        playlistItem.setAlbum(jsonObject.getString("rating"));
+                        Toast.makeText(getContext(), ""+jsonObject.getString("title"), Toast.LENGTH_SHORT).show();
+                        playlistItem.setArtist(jsonObject.getString("releaseYear"));
+                        playlistItem.setImage(jsonObject.getString("image"));
+
+                        //add to array
+                        playlistItemsArrayList.add(playlistItem);
+
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
+
+
+            }
+
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+        playlistListView.setAdapter(adapter);
+
+        VolleySingleton.getVolleyInstance().addToRequestQueue(jsonArrayRequest);
+
         return musicFragmentView;
 
+    }
+
+    public void hideDialog(){
+        if (progressDialog!=null);
+        progressDialog.dismiss();
+        progressDialog=null;
     }
 
     private void loadImageToView(String url, final ImageView holder)
@@ -161,6 +242,14 @@ public class MusicFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+
+
     }
 
     @Override

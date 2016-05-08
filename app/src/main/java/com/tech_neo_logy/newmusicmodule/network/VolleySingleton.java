@@ -16,6 +16,8 @@ public class VolleySingleton {
     private static VolleySingleton volleySingletonInstance = null;
     private RequestQueue requestQueue;
     private ImageLoader imageLoader;
+
+
     public static final String TAG = VolleySingleton.class
             .getSimpleName();
 

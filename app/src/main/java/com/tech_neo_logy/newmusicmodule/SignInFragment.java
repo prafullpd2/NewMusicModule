@@ -1,22 +1,40 @@
 package com.tech_neo_logy.newmusicmodule;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.ListView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.tech_neo_logy.newmusicmodule.musicService.PlaylistItemAdapter;
+import com.tech_neo_logy.newmusicmodule.musicService.PlaylistItems;
+import com.tech_neo_logy.newmusicmodule.network.VolleySingleton;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SignInFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private Button signInButton;
     private TextInputLayout signInEmailWrapper ,signInPasswordWrapper;
+
 
     public SignInFragment() {
         // Required empty public constructor
@@ -48,6 +66,7 @@ public class SignInFragment extends Fragment {
 
         signInEmailWrapper = (TextInputLayout) view.findViewById(R.id.sign_in_email_wrapper);
         signInPasswordWrapper = (TextInputLayout) view.findViewById(R.id.sign_in_password_wrapper);
+
         signInEmailWrapper.setHint("email");
         signInPasswordWrapper.setHint("password");
         signInButton = (Button)view.findViewById(R.id.signInbutton);
@@ -60,10 +79,9 @@ public class SignInFragment extends Fragment {
         });
 
 
-
-
         return view;
     }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
