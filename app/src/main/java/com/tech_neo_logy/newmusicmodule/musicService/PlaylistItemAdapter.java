@@ -63,9 +63,9 @@ public class PlaylistItemAdapter extends BaseAdapter{
             //getting data for row
 
            PlaylistItems items =  playlistItems.get(position);
-            networkImageView.setImageUrl(items.getImage(),imageLoader);
+            //networkImageView.setImageUrl(items.getImage(),imageLoader);
             song_title_tv.setText(items.getTitle());
-            song_artist_tv.setText(items.getArtist());
+           // song_artist_tv.setText(items.getArtist());
             song_album_tv.setText(items.getAlbum());
 
 

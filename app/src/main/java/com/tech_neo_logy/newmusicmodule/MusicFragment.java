@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -41,6 +42,7 @@ import java.util.List;
 
 public class MusicFragment extends Fragment {
 
+    public  boolean first_exec = true;
     private OnFragmentInteractionListener mListener;
     private int loader;
     private View musicFragmentView;
@@ -82,7 +84,7 @@ public class MusicFragment extends Fragment {
         musicFragmentView = inflater.inflate(R.layout.fragment_music,container,false);
         albumArt = (ImageView)musicFragmentView.findViewById(R.id.music_albumArt_netView);
         loadImageToView(image_url,albumArt);
-        musicUrl = "https://s3-ap-northeast-1.amazonaws.com/audiopraf2/02+-+3G+-+Khalbali+%5BMP3Khan%5D.mp3";
+        musicUrl = "https://s3-ap-northeast-1.amazonaws.com/audiopraf2/Raavan+-+Behne+De.mp3";
         playPauseButton = (ImageButton) musicFragmentView.findViewById(R.id.playPauseButton);
         nextTrackButton = (ImageButton) musicFragmentView.findViewById(R.id.nextTrackButton);
 
@@ -90,41 +92,37 @@ public class MusicFragment extends Fragment {
             playPauseButton.setBackgroundResource(R.mipmap.pause);
         else
             playPauseButton.setBackgroundResource(R.mipmap.play);
-        Toast.makeText(getContext(), "bool value "+boolMusicPlaying, Toast.LENGTH_SHORT).show();
-        setlistener();
+            //Toast.makeText(getContext(), "bool value "+boolMusicPlaying, Toast.LENGTH_SHORT).show();
 
         drawerLayout = (DrawerLayout)musicFragmentView.findViewById(R.id.drawer_in_music) ;
         playlistListView = (ListView)drawerLayout.findViewById(R.id.listView_playlist);
-
 
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setMessage("loading...");
         progressDialog.show();
 
-
         adapter = new PlaylistItemAdapter(getActivity(),playlistItemsArrayList);
 
-
-
-
         //create jsonvolley request
-
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(jsonUrl, new Response.Listener<JSONArray>() {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest("http://connect-practicingbee.rhcloud.com/music_fetcher.php?mood="+Navigation.mood, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-
                 hideDialog();
                 //parsing Json
                 for(int i=0;i<response.length();i++){
                     try {
                         JSONObject jsonObject = response.getJSONObject(i);
                         PlaylistItems playlistItem = new PlaylistItems();
-                        playlistItem.setTitle(jsonObject.getString("title"));
-                        playlistItem.setAlbum(jsonObject.getString("rating"));
-                        Toast.makeText(getContext(), ""+jsonObject.getString("title"), Toast.LENGTH_SHORT).show();
-                        playlistItem.setArtist(jsonObject.getString("releaseYear"));
-                        playlistItem.setImage(jsonObject.getString("image"));
-
+                        playlistItem.setTitle(jsonObject.getString("song_name"));
+                        playlistItem.setAlbum(jsonObject.getString("album"));
+                        playlistItem.setUrl(jsonObject.getString("url"));
+                        if (first_exec){
+                            musicUrl = jsonObject.getString("url");
+                            first_exec = false;
+                        }
+                       // playlistItem.setArtist(jsonObject.getString("releaseYear"));
+                       // playlistItem.setImage(jsonObject.getString("image"));
+                        // Toast.makeText(getContext(), ""+jsonObject.getString("song_name")+" "+jsonObject.getString("album"), Toast.LENGTH_SHORT).show();
                         //add to array
                         playlistItemsArrayList.add(playlistItem);
 
@@ -149,6 +147,7 @@ public class MusicFragment extends Fragment {
         playlistListView.setAdapter(adapter);
 
         VolleySingleton.getVolleyInstance().addToRequestQueue(jsonArrayRequest);
+        setlistener();
 
         return musicFragmentView;
 
@@ -188,6 +187,21 @@ public class MusicFragment extends Fragment {
                     playPauseButtonClick();
                 }
             });
+
+            playlistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                   Toast.makeText(getContext(), ""+((PlaylistItems)parent.getItemAtPosition(position)).getUrl(), Toast.LENGTH_SHORT).show();
+                   // if (boolMusicPlaying)
+                    stopMusic();
+                    musicUrl = ((PlaylistItems)parent.getItemAtPosition(position)).getUrl();
+                    streamMusic();
+                    playPauseButton.setBackgroundResource(R.mipmap.pause);
+                    boolMusicPlaying = true;
+
+                }
+            });
+
     }
 
     void playPauseButtonClick(){

@@ -41,7 +41,7 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
 
     void stopMedia() {
         if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+            mediaPlayer.pause();
         }
     }
 
@@ -60,9 +60,11 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         if (mediaPlayer != null) {
+            mediaPlayer.pause();
             mediaPlayer.stop();
         }
         mediaPlayer.release();
+        mediaPlayer = null;
         cancelNotification();
     }
 

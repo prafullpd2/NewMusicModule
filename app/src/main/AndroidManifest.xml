@@ -8,7 +8,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-
         android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -36,7 +35,16 @@
         <service
             android:name=".musicService.MusicPlayerService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name=".History" />
+        <activity android:name=".Comics" />
+        <activity android:name=".Drama" />
+        <activity android:name=".Poetry" />
+        <activity android:name=".utils.Technical" />
+        <activity android:name=".Horror" />
+        <activity android:name=".MoodSelectionSpinner" />
+        <activity android:name=".MoodPrediction"></activity>
     </application>
 
 </manifest>

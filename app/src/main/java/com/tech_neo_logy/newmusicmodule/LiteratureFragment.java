@@ -1,71 +1,96 @@
 package com.tech_neo_logy.newmusicmodule;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import com.tech_neo_logy.newmusicmodule.utils.Technical;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link LiteratureFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link LiteratureFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class LiteratureFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private ListView listView;
+    String[] listValue = new String[] {"HELLO Your Choice","Technical","Comics","History","Drama","Horror","Poetry","Comics","Romentic"};
+    private View view;
+    private ArrayAdapter<String> adapter;
 
     public LiteratureFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment LiteratureFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static LiteratureFragment newInstance(String param1, String param2) {
-        LiteratureFragment fragment = new LiteratureFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_literature, container, false);
-    }
+        view = inflater.inflate(R.layout.fragment_sign_up,container,false);
+
+        listView = (ListView)view.findViewById(R.id.listView1);
+        adapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_2, android.R.id.text1, listValue);
+
+        listView.setAdapter(adapter);
+// ListView on item selected listener.
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+// TODO Auto-generated method stub
+                if (position == 1) {
+                    Intent intent = new Intent(getContext(), Technical.class);
+                    startActivity(intent);
+                    //  }
+
+                }
+                if (position == 2) {
+                    Intent p2 = new Intent(getContext(), Comics.class);
+                    startActivity(p2);
+
+
+                }
+                if (position == 3) {
+                    Intent p3 = new Intent(getContext(), History.class);
+                    startActivity(p3);
+
+
+                }
+                if (position == 4) {
+                    Intent p4 = new Intent(getContext(), Drama.class);
+                    startActivity(p4);
+
+                }
+                if (position == 5) {
+                    Intent p5 = new Intent(getContext(), Horror.class);
+                    startActivity(p5);
+
+                }
+                if (position == 6) {
+                    Intent p6 = new Intent(getContext(), Poetry.class);
+                    startActivity(p6);
+                }
+
+            }
+        });
+
+
+        return view;
+   }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

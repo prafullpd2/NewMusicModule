@@ -23,13 +23,19 @@ public class Navigation extends AppCompatActivity
 
     private FragmentTransaction fragmentTransaction;
     private FragmentManager fragmentManager;
+    public static String mood;
+    public static Intent moodIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_navigation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+      //  Intent intent = new Intent();
+       // mood = intent.getStringExtra("mood");
+        mood = getIntent().getStringExtra("mood");
 
 
 

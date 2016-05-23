@@ -7,7 +7,15 @@ public class PlaylistItems {
     public String title,image;
     public String artist;
     public String album;
+    public String url;
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public String getTitle(){
 

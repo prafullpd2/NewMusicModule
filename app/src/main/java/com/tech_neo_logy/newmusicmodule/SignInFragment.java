@@ -1,9 +1,11 @@
 package com.tech_neo_logy.newmusicmodule;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -22,10 +25,24 @@ import com.tech_neo_logy.newmusicmodule.musicService.PlaylistItemAdapter;
 import com.tech_neo_logy.newmusicmodule.musicService.PlaylistItems;
 import com.tech_neo_logy.newmusicmodule.network.VolleySingleton;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +51,9 @@ public class SignInFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private Button signInButton;
     private TextInputLayout signInEmailWrapper ,signInPasswordWrapper;
-
+    private String username;
+    private String password;
+    public static final String USER_NAME = "USERNAME";
 
     public SignInFragment() {
         // Required empty public constructor
@@ -73,13 +92,103 @@ public class SignInFragment extends Fragment {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(v.getContext(), Navigation.class);
-                startActivity(i);
+//                Intent i = new Intent(v.getContext(), Navigation.class);
+//                startActivity(i);
+
+                username = signInEmailWrapper.getEditText().getText().toString();
+                password = signInPasswordWrapper.getEditText().getText().toString();
+                if (username.matches("") || password.matches("")) {
+                    Toast.makeText(getContext(), "You did not enter a username or password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                login(username, password);
+
             }
         });
 
 
         return view;
+    }
+
+    private void login(final String username, String password) {
+
+        class LoginAsync extends AsyncTask<String, Void, String> {
+
+            private Dialog loadingDialog;
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loadingDialog = ProgressDialog.show(getContext(), "Please wait", "Loading...");
+
+            }
+
+            @Override
+            protected String doInBackground(String... params) {
+                String uname = params[0];
+                String pass = params[1];
+
+                InputStream is = null;
+                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                nameValuePairs.add(new BasicNameValuePair("username", uname));
+                nameValuePairs.add(new BasicNameValuePair("password", pass));
+                String result = null;
+
+                try{
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpPost httpPost = new HttpPost(
+                            "http://technosoft.tk/login.php");
+
+                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                    HttpResponse response = httpClient.execute(httpPost);
+
+                    HttpEntity entity = response.getEntity();
+
+                    is = entity.getContent();
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+                    StringBuilder sb = new StringBuilder();
+
+                    String line = null;
+                    while ((line = reader.readLine()) != null)
+                    {
+                        sb.append(line + "\n");
+                    }
+                    result = sb.toString();
+                } catch (ClientProtocolException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result){
+                String s = result.trim();
+                loadingDialog.dismiss();
+                if(s.equalsIgnoreCase("success")){
+                    //Intent ntent = new Intent(getContext(), AfterLogin.class);
+                    Intent ntent = new Intent(getContext(), MoodSelectionSpinner.class);
+
+                    ntent.putExtra(USER_NAME, username);
+
+                    getActivity().finish();
+
+                    startActivity(ntent);
+                }else {
+                    Toast.makeText(getContext(), "Invalid User Name or Password", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        }
+
+        LoginAsync la = new LoginAsync();
+        la.execute(username, password);
+
     }
 
 
